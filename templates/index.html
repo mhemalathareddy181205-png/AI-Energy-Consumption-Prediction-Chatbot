@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>AI Energy Assistant</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>⚡ AI Energy Assistant</h1>
+
+        <!-- Chat Area -->
+        <div id="chatbox"></div>
+
+        <!-- Power Prediction Section -->
+        <h3>Power Consumption Prediction</h3>
+
+        <div class="prediction-form">
+
+            <label>Global Reactive Power</label>
+            <input
+                type="number"
+                id="reactive_power"
+                placeholder="Enter Reactive Power"
+                step="any"
+            >
+
+            <label>Voltage</label>
+            <input
+                type="number"
+                id="voltage"
+                placeholder="Enter Voltage"
+                step="any"
+            >
+
+            <label>Global Intensity</label>
+            <input
+                type="number"
+                id="intensity"
+                placeholder="Enter Intensity"
+                step="any"
+            >
+
+            <label>Sub Metering 1</label>
+            <input
+                type="number"
+                id="sub1"
+                placeholder="Enter Sub Metering 1"
+                step="any"
+            >
+
+            <label>Sub Metering 2</label>
+            <input
+                type="number"
+                id="sub2"
+                placeholder="Enter Sub Metering 2"
+                step="any"
+            >
+
+            <label>Sub Metering 3</label>
+            <input
+                type="number"
+                id="sub3"
+                placeholder="Enter Sub Metering 3"
+                step="any"
+            >
+
+            <label>Date & Time</label>
+            <input
+                type="datetime-local"
+                id="datetime"
+            >
+
+            <button onclick="predictPower()">
+                Predict Power
+            </button>
+
+        </div>
+
+        <div id="predictionResult"></div>
+
+        <hr>
+
+        <!-- Budget Advisor Section -->
+        <h3>💰 Energy Budget Advisor</h3>
+
+        <div class="prediction-form">
+
+            <label>Monthly Income (₹)</label>
+            <input
+                type="number"
+                id="income"
+                placeholder="Enter Monthly Income"
+            >
+
+            <label>Electricity Rate (₹ per kWh)</label>
+            <input
+                type="number"
+                id="rate"
+                placeholder="Enter Rate per kWh"
+                value="8"
+            >
+
+            <button onclick="calculateBudget()">
+                Check Energy Budget
+            </button>
+
+        </div>
+
+        <div id="budgetResult"></div>
+
+        <hr>
+
+        <!-- Chat Input -->
+        <div class="input-area">
+
+            <input
+                type="text"
+                id="message"
+                placeholder="Ask about energy consumption..."
+            >
+
+            <button onclick="sendMessage()">
+                Send
+            </button>
+
+        </div>
+
+    </div>
+
+    <script
+        src="{{ url_for('static', filename='script.js') }}"
+    ></script>
+
+</body>
+
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Chat History</title>
+    <link rel="stylesheet"
+href="{{ url_for('static', filename='history.css') }}">
+</head>
+
+<body>
+
+    <h1>Chat History</h1>
+
+    <table border="1">
+
+        <tr>
+            <th>ID</th>
+            <th>User Message</th>
+            <th>Bot Response</th>
+            <th>Timestamp</th>
+        </tr>
+
+        {% for chat in chats %}
+
+        <tr>
+            <td>{{ chat[0] }}</td>
+            <td>{{ chat[1] }}</td>
+            <td>{{ chat[2] }}</td>
+            <td>{{ chat[3] }}</td>
+        </tr>
+
+        {% endfor %}
+
+    </table>
+
+</body>
+
+</html>

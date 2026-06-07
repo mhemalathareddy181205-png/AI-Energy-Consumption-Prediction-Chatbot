@@ -1,0 +1,101 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #eef2f7;
+    display: flex;
+    justify-content: center;
+    padding-top: 30px;
+}
+
+.container {
+    width: 700px;
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+h1 {
+    text-align: center;
+    color: #2e7d32;
+}
+
+#chatbox {
+    height: 450px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 15px;
+    background: #f9fafb;
+    margin-bottom: 15px;
+}
+
+.user {
+    text-align: right;
+    margin: 10px 0;
+}
+
+.user b {
+    background: #4caf50;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 15px;
+    display: inline-block;
+}
+
+.bot {
+    text-align: left;
+    margin: 10px 0;
+}
+
+.bot b {
+    background: #e3f2fd;
+    padding: 10px 15px;
+    border-radius: 15px;
+    display: inline-block;
+}
+
+.input-area {
+    display: flex;
+    gap: 10px;
+}
+
+input {
+    flex: 1;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+button {
+    background: #4caf50;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #388e3c;
+}
+.prediction-form{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-bottom:20px;
+}
+
+.prediction-form input{
+    padding:10px;
+}
+
+#predictionResult{
+    margin:15px 0;
+    font-weight:bold;
+    color:green;
+}
+.prediction-form label {
+    font-weight: bold;
+    margin-top: 10px;
+    display: block;
+}
