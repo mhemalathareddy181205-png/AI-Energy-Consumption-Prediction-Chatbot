@@ -1,145 +1,165 @@
 <!DOCTYPE html>
+
 <html>
 
 <head>
 
-    <title>AI Energy Assistant</title>
+```
+<title>AI Household Energy Budget Advisor</title>
 
-    <link
-        rel="stylesheet"
-        href="{{ url_for('static', filename='style.css') }}"
-    >
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='style.css') }}"
+>
+```
 
 </head>
 
 <body>
 
-    <div class="container">
+<div class="container">
 
-        <h1>⚡ AI Energy Assistant</h1>
+```
+<h1>⚡ AI Household Energy Budget Advisor</h1>
 
-        <!-- Chat Area -->
-        <div id="chatbox"></div>
+<div class="dashboard">
 
-        <!-- Power Prediction Section -->
-        <h3>Power Consumption Prediction</h3>
+    <!-- Input Card -->
 
-        <div class="prediction-form">
+    <div class="card">
 
-            <label>Global Reactive Power</label>
-            <input
-                type="number"
-                id="reactive_power"
-                placeholder="Enter Reactive Power"
-                step="any"
-            >
-
-            <label>Voltage</label>
-            <input
-                type="number"
-                id="voltage"
-                placeholder="Enter Voltage"
-                step="any"
-            >
-
-            <label>Global Intensity</label>
-            <input
-                type="number"
-                id="intensity"
-                placeholder="Enter Intensity"
-                step="any"
-            >
-
-            <label>Sub Metering 1</label>
-            <input
-                type="number"
-                id="sub1"
-                placeholder="Enter Sub Metering 1"
-                step="any"
-            >
-
-            <label>Sub Metering 2</label>
-            <input
-                type="number"
-                id="sub2"
-                placeholder="Enter Sub Metering 2"
-                step="any"
-            >
-
-            <label>Sub Metering 3</label>
-            <input
-                type="number"
-                id="sub3"
-                placeholder="Enter Sub Metering 3"
-                step="any"
-            >
-
-            <label>Date & Time</label>
-            <input
-                type="datetime-local"
-                id="datetime"
-            >
-
-            <button onclick="predictPower()">
-                Predict Power
-            </button>
-
-        </div>
-
-        <div id="predictionResult"></div>
-
-        <hr>
-
-        <!-- Budget Advisor Section -->
-        <h3>💰 Energy Budget Advisor</h3>
+        <h2>📋 Energy Analysis Form</h2>
 
         <div class="prediction-form">
 
-            <label>Monthly Income (₹)</label>
             <input
                 type="number"
                 id="income"
-                placeholder="Enter Monthly Income"
+                placeholder="Monthly Income (₹)"
             >
 
-            <label>Electricity Rate (₹ per kWh)</label>
             <input
                 type="number"
-                id="rate"
-                placeholder="Enter Rate per kWh"
-                value="8"
+                id="tariff"
+                placeholder="Electricity Tariff (₹/unit)"
             >
-
-            <button onclick="calculateBudget()">
-                Check Energy Budget
-            </button>
-
-        </div>
-
-        <div id="budgetResult"></div>
-
-        <hr>
-
-        <!-- Chat Input -->
-        <div class="input-area">
 
             <input
-                type="text"
-                id="message"
-                placeholder="Ask about energy consumption..."
+                type="number"
+                id="previous_reading"
+                placeholder="Previous Meter Reading"
             >
 
-            <button onclick="sendMessage()">
-                Send
+            <input
+                type="number"
+                id="current_reading"
+                placeholder="Current Meter Reading"
+            >
+
+            <input
+                type="number"
+                id="fans"
+                placeholder="Number of Fans"
+            >
+
+            <input
+                type="number"
+                id="lights"
+                placeholder="Number of Lights"
+            >
+
+            <input
+                type="number"
+                id="tv_hours"
+                placeholder="TV Usage Hours / Day"
+            >
+
+            <input
+                type="number"
+                id="ac_hours"
+                placeholder="AC Usage Hours / Day"
+            >
+
+            <input
+                type="number"
+                id="wm_hours"
+                placeholder="Washing Machine Hours / Week"
+            >
+
+            <select id="refrigerator">
+
+                <option value="yes">
+                    Refrigerator - Yes
+                </option>
+
+                <option value="no">
+                    Refrigerator - No
+                </option>
+
+            </select>
+
+            <button onclick="calculateBill()">
+
+                Analyze Consumption
+
             </button>
 
         </div>
 
     </div>
 
-    <script
-        src="{{ url_for('static', filename='script.js') }}"
-    ></script>
+    <!-- Report Card -->
+
+    <div class="card">
+
+        <h2>📊 Energy Report</h2>
+
+        <div id="predictionResult">
+
+            <p>
+                Fill in the form and click
+                <b>Analyze Consumption</b>
+                to generate your report.
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Chatbot Card -->
+
+<div class="card chat-card">
+
+    <h2>🤖 AI Energy Assistant</h2>
+
+    <div id="chatbox"></div>
+
+    <div class="chat-input">
+
+        <input
+            type="text"
+            id="message"
+            placeholder="Ask energy-related questions..."
+        >
+
+        <button onclick="sendMessage()">
+
+            Send
+
+        </button>
+
+    </div>
+
+</div>
+```
+
+</div>
+
+<script
+    src="{{ url_for('static', filename='script.js') }}"
+></script>
 
 </body>
 

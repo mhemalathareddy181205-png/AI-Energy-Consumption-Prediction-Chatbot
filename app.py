@@ -1,16 +1,31 @@
 from flask import Flask, render_template, request, jsonify
 import joblib
 import sqlite3
+import os
 
-# Load models
+print("Loading intent model...")
+intent_model = joblib.load("intent_model.pkl")
+
+print("Loading vectorizer...")
+vectorizer = joblib.load("vectorizer.pkl")
+
+print("Loading forecast model...")
+bill_forecast_model = joblib.load("bill_forecast_model.pkl")
+
+print("All models loaded successfully!")
+
+# Load chatbot models
 intent_model = joblib.load("intent_model.pkl")
 vectorizer = joblib.load("vectorizer.pkl")
-power_model = joblib.load("power_consumption_model.pkl")
+bill_forecast_model = joblib.load(
+    "bill_forecast_model.pkl"
+)
 
 # Create Flask app
 app = Flask(__name__)
 
-# Intent detection
+
+# Intent Detection
 def detect_intent(message):
 
     vector = vectorizer.transform([message])
@@ -18,27 +33,6 @@ def detect_intent(message):
     intent = intent_model.predict(vector)[0]
 
     return intent
-
-
-# Sample prediction for chatbot
-def predict_sample_power():
-
-    sample = [[
-        0.1,    # Global_reactive_power
-        240,    # Voltage
-        5,      # Global_intensity
-        0,      # Sub_metering_1
-        1,      # Sub_metering_2
-        10,     # Sub_metering_3
-        12,     # Hour
-        15,     # Day
-        6,      # Month
-        2       # Weekday
-    ]]
-
-    prediction = power_model.predict(sample)
-
-    return round(prediction[0], 3)
 
 
 # Home Page
@@ -61,7 +55,7 @@ def chat():
 
     if intent == "greeting":
 
-        response = "Hello! I am your Energy Assistant."
+        response = "Hello! I am your Energy Budget Assistant."
 
     elif intent == "thanks":
 
@@ -74,32 +68,32 @@ def chat():
     elif intent == "capabilities":
 
         response = (
-            "I can help with power prediction, energy saving tips, FAQs, and household power consumption analysis."
+            "I can analyze electricity usage, estimate bills, compare them with your budget, and provide energy-saving recommendations."
         )
 
     elif intent == "power_saving":
 
         response = (
-            "To save electricity: use LED bulbs, switch off unused appliances, use energy-efficient devices, and avoid standby power consumption."
+            "Use LED bulbs, switch off unused appliances, reduce AC usage, and avoid standby power consumption."
         )
 
     elif intent == "how_are_you":
 
         response = (
-            "I'm doing great! Thanks for asking. How can I help you with energy consumption today?"
+            "I'm doing great! How can I help you manage your electricity consumption today?"
         )
 
     elif intent == "prediction":
 
-        predicted_value = predict_sample_power()
-
         response = (
-            f"Predicted Power Consumption: {predicted_value} kW"
+            "Use the Energy Budget Analysis form above to estimate your electricity bill and get personalized recommendations."
         )
 
     else:
 
-        response = "Sorry, I didn't understand that."
+        response = (
+            "Sorry, I didn't understand that."
+        )
 
     # Save chat history
     conn = sqlite3.connect("chat_history.db")
@@ -124,47 +118,216 @@ def chat():
     })
 
 
-# Prediction Route
-@app.route("/predict", methods=["POST"])
-def predict():
+# Energy Budget Analysis
+@app.route("/analyze", methods=["POST"])
+def analyze():
 
     data = request.json
 
-    features = [[
+    income = float(data["income"])
+    tariff = float(data["tariff"])
 
-        float(data["reactive_power"]),
-        float(data["voltage"]),
-        float(data["intensity"]),
-        float(data["sub1"]),
-        float(data["sub2"]),
-        float(data["sub3"]),
-        float(data["hour"]),
-        float(data["day"]),
-        float(data["month"]),
-        float(data["weekday"])
+    previous_reading = float(
+        data["previous_reading"]
+    )
 
-    ]]
+    current_reading = float(
+        data["current_reading"]
+    )
 
-    prediction = power_model.predict(features)[0]
+    fans = int(data["fans"])
+    lights = int(data["lights"])
+
+    tv_hours = float(
+        data["tv_hours"]
+    )
+
+    ac_hours = float(
+        data["ac_hours"]
+    )
+
+    wm_hours = float(
+        data["wm_hours"]
+    )
+
+    refrigerator = data["refrigerator"]
+
+    # Validation
+
+    if current_reading < previous_reading:
+
+        return jsonify({
+
+            "error":
+            "It looks like the readings were entered in reverse order. Current reading should be greater than or equal to previous reading."
+
+            })
+
+
+    # Units Consumed
+
+    units = (
+        current_reading -
+        previous_reading
+    )
+
+    
+    # Electricity Bill
+
+    bill = units * tariff
+
+    # Recommended Budget
+    # 5% of Monthly Income
+
+    budget = income * 0.05
+
+    # Budget Status
+
+    if bill <= budget:
+
+        status = "✅ Within Budget"
+
+    else:
+
+        status = "⚠ Above Budget"
+
+    # Suggestions
+
+    suggestions = ""
+
+    if ac_hours > 8:
+
+        suggestions += (
+            "<li>Reduce AC usage by 1-2 hours per day.</li>"
+        )
+
+    if lights > 10:
+
+        suggestions += (
+            "<li>Switch to LED bulbs to reduce electricity consumption.</li>"
+        )
+
+    if fans > 5:
+
+        suggestions += (
+            "<li>Consider energy-efficient fans.</li>"
+        )
+
+    if refrigerator.lower() == "yes":
+
+        suggestions += (
+            "<li>Keep refrigerator doors closed properly to reduce energy loss.</li>"
+        )
+
+    if wm_hours > 5:
+
+        suggestions += (
+            "<li>Reduce washing machine usage where possible.</li>"
+        )
+
+    if bill > budget:
+
+        suggestions += (
+            "<li>Your bill exceeds the recommended budget. Consider reducing appliance usage.</li>"
+        )
+
+    if suggestions == "":
+
+        suggestions = (
+            "<li>Great job! Your energy usage appears efficient.</li>"
+        )
+
+    # Estimated Savings
+
+    ac_saving_units = ac_hours * 1.5
+    tv_saving_units = tv_hours * 0.1
+    wm_saving_units = wm_hours * 0.5
+
+    total_saving_units = (
+        ac_saving_units +
+        tv_saving_units +
+        wm_saving_units
+    )
+
+    estimated_saving_amount = (
+        total_saving_units *
+        tariff
+    )
+    # Next Month Bill Forecast
+
+    forecast_features = [[
+        
+        income,
+        units,
+        fans,
+        lights,
+        tv_hours,
+        ac_hours,
+        wm_hours
+        ]]
+
+    next_month_bill = (
+        bill_forecast_model
+        .predict(
+            forecast_features
+            )[0]
+            )
 
     return jsonify({
-        "prediction": round(prediction, 3)
+
+        "units": round(
+            units,
+            2
+        ),
+
+        "bill": round(
+            bill,
+            2
+        ),
+
+        "budget": round(
+            budget,
+            2
+        ),
+
+        "status": status,
+
+        "suggestions": suggestions,
+
+        "saving_units": round(
+            total_saving_units,
+            2
+        ),
+
+        "saving_amount": round(
+            estimated_saving_amount,
+            2
+        ),
+        "next_month_bill": round(
+        next_month_bill,
+        2
+    )
+
     })
 
 
-# Chat History Page
+# Chat History
 @app.route("/history")
 def history():
 
-    conn = sqlite3.connect("chat_history.db")
+    conn = sqlite3.connect(
+        "chat_history.db"
+    )
 
     cursor = conn.cursor()
 
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT *
         FROM chats
         ORDER BY id DESC
-    """)
+        """
+    )
 
     rows = cursor.fetchall()
 
@@ -175,16 +338,10 @@ def history():
         chats=rows
     )
 
-import os
 
 if __name__ == "__main__":
 
-    port = int(
-        os.environ.get(
-            "PORT",
-            5000
-        )
-    )
+    port = int(os.environ.get("PORT", 5000))
 
     app.run(
         host="0.0.0.0",

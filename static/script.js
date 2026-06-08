@@ -3,12 +3,12 @@ async function sendMessage() {
     let message =
         document.getElementById("message").value;
 
+    let chatbox =
+        document.getElementById("chatbox");
+
     if (message.trim() === "") {
         return;
     }
-
-    let chatbox =
-        document.getElementById("chatbox");
 
     chatbox.innerHTML +=
         `<div class="user">
@@ -42,7 +42,6 @@ async function sendMessage() {
         chatbox.scrollHeight;
 }
 
-
 document
 .getElementById("message")
 .addEventListener("keypress", function(event) {
@@ -55,35 +54,57 @@ document
 
 });
 
+function calculateBill() {
 
-function predictPower() {
+    const income =
+        parseFloat(
+            document.getElementById("income").value
+        );
 
-    const datetime =
-        document.getElementById("datetime").value;
+    const tariff =
+        parseFloat(
+            document.getElementById("tariff").value
+        );
 
-    if (!datetime) {
+    const previousReading =
+        parseFloat(
+            document.getElementById("previous_reading").value
+        );
 
-        alert("Please select Date & Time");
+    const currentReading =
+        parseFloat(
+            document.getElementById("current_reading").value
+        );
 
-        return;
-    }
+    const fans =
+        parseInt(
+            document.getElementById("fans").value
+        );
 
-    const date =
-        new Date(datetime);
+    const lights =
+        parseInt(
+            document.getElementById("lights").value
+        );
 
-    const hour =
-        date.getHours();
+    const tvHours =
+        parseFloat(
+            document.getElementById("tv_hours").value
+        );
 
-    const day =
-        date.getDate();
+    const acHours =
+        parseFloat(
+            document.getElementById("ac_hours").value
+        );
 
-    const month =
-        date.getMonth() + 1;
+    const wmHours =
+        parseFloat(
+            document.getElementById("wm_hours").value
+        );
 
-    const weekday =
-        date.getDay();
+    const refrigerator =
+        document.getElementById("refrigerator").value;
 
-    fetch("/predict", {
+    fetch("/analyze", {
 
         method: "POST",
 
@@ -93,43 +114,31 @@ function predictPower() {
 
         body: JSON.stringify({
 
-            reactive_power:
-            document.getElementById(
-                "reactive_power"
-            ).value,
+            income: income,
 
-            voltage:
-            document.getElementById(
-                "voltage"
-            ).value,
+            tariff: tariff,
 
-            intensity:
-            document.getElementById(
-                "intensity"
-            ).value,
+            previous_reading:
+                previousReading,
 
-            sub1:
-            document.getElementById(
-                "sub1"
-            ).value,
+            current_reading:
+                currentReading,
 
-            sub2:
-            document.getElementById(
-                "sub2"
-            ).value,
+            fans: fans,
 
-            sub3:
-            document.getElementById(
-                "sub3"
-            ).value,
+            lights: lights,
 
-            hour: hour,
+            tv_hours:
+                tvHours,
 
-            day: day,
+            ac_hours:
+                acHours,
 
-            month: month,
+            wm_hours:
+                wmHours,
 
-            weekday: weekday
+            refrigerator:
+                refrigerator
 
         })
 
@@ -139,108 +148,80 @@ function predictPower() {
 
     .then(data => {
 
+        if (data.error) {
+
+            document.getElementById(
+                "predictionResult"
+            ).innerHTML =
+            `<p style="color:red;">
+                ${data.error}
+            </p>`;
+
+            return;
+        }
+
+        document.getElementById(
+            "predictionResult"
+        ).innerHTML = `
+
+        <h3>⚡ Energy Report</h3>
+
+        <p>
+        <b>Units Consumed:</b>
+        ${data.units}
+        </p>
+
+        <p>
+        <b>Estimated Bill:</b>
+        ₹${data.bill}
+        </p>
+
+        <p>
+        <b>Recommended Budget:</b>
+        ₹${data.budget}
+        </p>
+
+        <p>
+        <b>Status:</b>
+        ${data.status}
+        </p>
+
+        <p>
+        <b>Potential Savings:</b>
+        ₹${data.saving_amount}
+        </p>
+
+        <p>
+        <b>Possible Units Saved:</b>
+        ${data.saving_units}
+        </p>
+
+        <p>
+        <b>Predicted Next Month Bill:</b>
+        ₹${data.next_month_bill}
+        </p>
+
+        <p>
+        <b>Suggestions:</b>
+        </p>
+
+        <ul>
+        ${data.suggestions}
+        </ul>
+
+        `;
+
+    })
+
+    .catch(error => {
+
+        console.error(error);
+
         document.getElementById(
             "predictionResult"
         ).innerHTML =
-
-        `<h3>
-            Predicted Power Consumption:
-            ${data.prediction} kW
-        </h3>`;
+        "<p>Error calculating bill.</p>";
 
     });
 
-}
-
-
-function calculateBudget() {
-
-    const income =
-        parseFloat(
-            document.getElementById(
-                "income"
-            ).value
-        );
-
-    const rate =
-        parseFloat(
-            document.getElementById(
-                "rate"
-            ).value
-        );
-
-    if (!income || !rate) {
-
-        alert(
-            "Please enter Income and Electricity Rate"
-        );
-
-        return;
-    }
-
-    const predictionText =
-        document.getElementById(
-            "predictionResult"
-        ).innerText;
-
-    const match =
-        predictionText.match(/[0-9.]+/);
-
-    if (!match) {
-
-        alert(
-            "Please predict power consumption first."
-        );
-
-        return;
-    }
-
-    const power =
-        parseFloat(match[0]);
-
-    const estimatedBill =
-        power * 30 * rate;
-
-    const recommendedBudget =
-        income * 0.05;
-
-    let status = "";
-
-    if (
-        estimatedBill <=
-        recommendedBudget
-    ) {
-
-        status =
-            "✅ Within Budget";
-
-    } else {
-
-        status =
-            "⚠ Above Recommended Budget";
-
-    }
-
-    document.getElementById(
-        "budgetResult"
-    ).innerHTML =
-
-    `
-    <h3>Budget Analysis</h3>
-
-    <p>
-    <b>Estimated Monthly Bill:</b>
-    ₹${estimatedBill.toFixed(2)}
-    </p>
-
-    <p>
-    <b>Recommended Electricity Budget:</b>
-    ₹${recommendedBudget.toFixed(2)}
-    </p>
-
-    <p>
-    <b>Status:</b>
-    ${status}
-    </p>
-    `;
 }

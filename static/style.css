@@ -1,101 +1,306 @@
+/* General */
+
 body {
+
     font-family: Arial, sans-serif;
-    background: #eef2f7;
-    display: flex;
-    justify-content: center;
-    padding-top: 30px;
+
+    background: #f4f7fc;
+
+    margin: 0;
+
+    padding: 20px;
+
 }
+
+/* Main Container */
 
 .container {
-    width: 700px;
-    background: white;
-    border-radius: 15px;
-    padding: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+
+    max-width: 1200px;
+
+    margin: auto;
+
 }
+
+/* Header */
 
 h1 {
+
     text-align: center;
-    color: #2e7d32;
+
+    color: #2563eb;
+
+    margin-bottom: 25px;
+
 }
 
-#chatbox {
-    height: 450px;
-    overflow-y: auto;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 15px;
-    background: #f9fafb;
-    margin-bottom: 15px;
+/* Dashboard Layout */
+
+.dashboard {
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 20px;
+
 }
 
-.user {
-    text-align: right;
-    margin: 10px 0;
-}
+/* Cards */
 
-.user b {
-    background: #4caf50;
-    color: white;
-    padding: 10px 15px;
+.card {
+
+    background: white;
+
     border-radius: 15px;
-    display: inline-block;
+
+    padding: 20px;
+
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+
 }
 
-.bot {
-    text-align: left;
-    margin: 10px 0;
-}
+/* Form */
 
-.bot b {
-    background: #e3f2fd;
-    padding: 10px 15px;
-    border-radius: 15px;
-    display: inline-block;
-}
+.prediction-form {
 
-.input-area {
-    display: flex;
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
     gap: 10px;
+
 }
 
-input {
-    flex: 1;
+.prediction-form input,
+.prediction-form select {
+
     padding: 12px;
+
+    border: 1px solid #d1d5db;
+
     border-radius: 8px;
-    border: 1px solid #ccc;
+
+    font-size: 14px;
+
 }
+
+/* Buttons */
 
 button {
-    background: #4caf50;
+
+    background: #2563eb;
+
     color: white;
+
     border: none;
-    padding: 12px 20px;
+
     border-radius: 8px;
+
+    padding: 12px;
+
     cursor: pointer;
+
+    font-size: 15px;
+
+    transition: 0.3s;
+
 }
 
 button:hover {
-    background: #388e3c;
-}
-.prediction-form{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:10px;
-    margin-bottom:20px;
+
+    background: #1d4ed8;
+
 }
 
-.prediction-form input{
-    padding:10px;
+/* Analyze Button */
+
+.prediction-form button {
+
+    grid-column: span 2;
+
 }
 
-#predictionResult{
-    margin:15px 0;
-    font-weight:bold;
-    color:green;
+/* Report Section */
+
+#predictionResult {
+
+    margin-top: 15px;
+
 }
-.prediction-form label {
+
+/* Metrics */
+
+.metrics {
+
+    display: grid;
+
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 15px;
+
+    margin-bottom: 20px;
+
+}
+
+.metric-card {
+
+    background: #eef4ff;
+
+    border-radius: 12px;
+
+    padding: 15px;
+
+    text-align: center;
+
+}
+
+.metric-value {
+
+    font-size: 24px;
+
     font-weight: bold;
-    margin-top: 10px;
-    display: block;
+
+    color: #2563eb;
+
+}
+
+.metric-label {
+
+    color: #6b7280;
+
+    font-size: 14px;
+
+}
+
+/* Status */
+
+.success {
+
+    color: #16a34a;
+
+    font-weight: bold;
+
+}
+
+.warning {
+
+    color: #dc2626;
+
+    font-weight: bold;
+
+}
+
+/* Suggestions */
+
+ul {
+
+    padding-left: 20px;
+
+}
+
+li {
+
+    margin-bottom: 8px;
+
+}
+
+/* Chat Section */
+
+.chat-card {
+
+    margin-top: 25px;
+
+}
+
+#chatbox {
+
+    height: 300px;
+
+    overflow-y: auto;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 10px;
+
+    padding: 10px;
+
+    background: #fafafa;
+
+    margin-bottom: 10px;
+
+}
+
+.user {
+
+    text-align: right;
+
+    margin: 10px 0;
+
+}
+
+.user b {
+
+    color: #2563eb;
+
+}
+
+.bot {
+
+    text-align: left;
+
+    margin: 10px 0;
+
+}
+
+.bot b {
+
+    color: #16a34a;
+
+}
+
+/* Chat Input */
+
+.chat-input {
+
+    display: flex;
+
+    gap: 10px;
+
+}
+
+.chat-input input {
+
+    flex: 1;
+
+    padding: 12px;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 8px;
+
+}
+
+/* Mobile */
+
+@media (max-width: 768px) {
+
+    .dashboard {
+
+        grid-template-columns: 1fr;
+
+    }
+
+    .prediction-form {
+
+        grid-template-columns: 1fr;
+
+    }
+
+    .prediction-form button {
+
+        grid-column: span 1;
+
+    }
+
 }
