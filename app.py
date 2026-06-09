@@ -14,15 +14,26 @@ bill_forecast_model = joblib.load("bill_forecast_model.pkl")
 
 print("All models loaded successfully!")
 
-# Load chatbot models
-intent_model = joblib.load("intent_model.pkl")
-vectorizer = joblib.load("vectorizer.pkl")
-bill_forecast_model = joblib.load(
-    "bill_forecast_model.pkl"
-)
 
 # Create Flask app
 app = Flask(__name__)
+
+# Store conversation state
+user_sessions = {}
+
+questions = [
+    ("income", "What is your monthly income (₹)?"),
+    ("tariff", "What is your electricity tariff (₹/unit)?"),
+    ("previous_reading", "What is your previous meter reading?"),
+    ("current_reading", "What is your current meter reading?"),
+    ("fans", "How many fans do you have?"),
+    ("lights", "How many lights do you have?"),
+    ("tv_hours", "How many hours per day do you use the TV?"),
+    ("ac_hours", "How many hours per day do you use the AC?"),
+    ("wm_hours", "How many hours per week do you use the washing machine?"),
+    ("refrigerator", "Do you have a refrigerator? (Yes/No)")
+]
+
 
 
 # Intent Detection
@@ -41,21 +52,190 @@ def home():
 
     return render_template("index.html")
 
+def is_consumption_request(message):
+
+    msg = message.lower()
+
+    keywords = [
+    "calculate consumption",
+    "analyze consumption",
+    "calculate bill",
+    "electricity bill",
+    "energy analysis"
+    ]
+
+    return any(
+        keyword in msg
+        for keyword in keywords
+    )
+
 
 # Chat API
 @app.route("/chat", methods=["POST"])
 def chat():
 
     user_message = request.json["message"]
+    user_id = "default_user"
 
+    # Start consumption analysis
+    if is_consumption_request(user_message):
+
+        user_sessions[user_id] = {
+            "step": 0,
+            "answers": {}
+        }
+
+        return jsonify({
+            "response": questions[0][1]
+        })
+
+    # Continue conversation flow
+    if user_id in user_sessions:
+
+        session = user_sessions[user_id]
+
+        step = session["step"]
+
+        field_name = questions[step][0]
+
+        session["answers"][field_name] = user_message
+
+        session["step"] += 1
+
+        # Ask next question
+        if session["step"] < len(questions):
+
+            return jsonify({
+                "response": questions[session["step"]][1]
+            })
+
+        # All answers collected
+        data = session["answers"]
+
+        del user_sessions[user_id]
+
+        try:
+
+            income = float(data["income"])
+            tariff = float(data["tariff"])
+            previous_reading = float(data["previous_reading"])
+            current_reading = float(data["current_reading"])
+            fans = int(data["fans"])
+            lights = int(data["lights"])
+            tv_hours = float(data["tv_hours"])
+            ac_hours = float(data["ac_hours"])
+            wm_hours = float(data["wm_hours"])
+            refrigerator = data["refrigerator"]
+
+            if current_reading < previous_reading:
+
+                return jsonify({
+                    "response":
+                    "Current reading must be greater than or equal to previous reading."
+                })
+
+            units = current_reading - previous_reading
+
+            bill = units * tariff
+
+            budget = income * 0.05
+
+            status = (
+                "✅ Within Budget"
+                if bill <= budget
+                else "⚠ Above Budget"
+            )
+
+            suggestions = []
+
+            if ac_hours > 8:
+                suggestions.append(
+                    "Reduce AC usage by 1–2 hours per day."
+                )
+
+            if lights > 10:
+                suggestions.append(
+                    "Switch to LED bulbs."
+                )
+
+            if fans > 5:
+                suggestions.append(
+                    "Consider energy-efficient fans."
+                )
+
+            if refrigerator.lower() == "yes":
+                suggestions.append(
+                    "Keep refrigerator doors closed properly."
+                )
+
+            if wm_hours > 5:
+                suggestions.append(
+                    "Reduce washing machine usage where possible."
+                )
+
+            if bill > budget:
+                suggestions.append(
+                    "Your bill exceeds the recommended budget."
+                )
+
+            if not suggestions:
+                suggestions.append(
+                    "Great job! Your energy usage appears efficient."
+                )
+
+            forecast_features = [[
+                income,
+                units,
+                fans,
+                lights,
+                tv_hours,
+                ac_hours,
+                wm_hours
+            ]]
+
+            next_month_bill = (
+                bill_forecast_model.predict(
+                    forecast_features
+                )[0]
+            )
+
+            response = f"""
+           📊 <b>Energy Analysis Result</b><br><br>
+           ⚡ Units Consumed: {units:.2f}<br>
+           💰 Current Bill: ₹{bill:.2f}<br>
+           🎯 Recommended Budget: ₹{budget:.2f}<br>
+           📈 Status: {status}<br>
+           🔮 Forecast Next Month Bill: ₹{next_month_bill:.2f}<br><br>
+           <b>Suggestions:</b><br>
+           """ + "<br>".join(
+               f"• {item}"
+               for item in suggestions
+               )
+
+            response += """
+            <br><br>
+            <hr>
+            💡 <b>Tip:</b> Type <b>'calculate consumption'</b>
+            anytime to perform another analysis.
+            """
+            
+            return jsonify({
+                "response": response
+                })
+        except Exception as e:
+            
+            return jsonify({
+                "response": f"Error processing analysis: {str(e)}"
+                })
+            
+    # Normal chatbot flow
     intent = detect_intent(user_message)
-
-    print("User:", user_message)
-    print("Intent:", intent)
 
     if intent == "greeting":
 
-        response = "Hello! I am your Energy Budget Assistant."
+        response = (
+            "Hello! I am your Energy Budget Assistant."
+        )
 
     elif intent == "thanks":
 
@@ -63,12 +243,14 @@ def chat():
 
     elif intent == "goodbye":
 
-        response = "Goodbye! Have a great day."
+        response = (
+            "Goodbye! Have a great day."
+        )
 
     elif intent == "capabilities":
 
         response = (
-            "I can analyze electricity usage, estimate bills, compare them with your budget, and provide energy-saving recommendations."
+            "I can analyze electricity usage, estimate bills, compare them with your budget, forecast next month's bill, and provide energy-saving recommendations."
         )
 
     elif intent == "power_saving":
@@ -86,7 +268,7 @@ def chat():
     elif intent == "prediction":
 
         response = (
-            "Use the Energy Budget Analysis form above to estimate your electricity bill and get personalized recommendations."
+            "Type 'calculate consumption' and I will ask the required details one by one."
         )
 
     else:
@@ -95,8 +277,9 @@ def chat():
             "Sorry, I didn't understand that."
         )
 
-    # Save chat history
-    conn = sqlite3.connect("chat_history.db")
+    conn = sqlite3.connect(
+        "chat_history.db"
+    )
 
     cursor = conn.cursor()
 
@@ -116,6 +299,8 @@ def chat():
     return jsonify({
         "response": response
     })
+
+   
 
 
 # Energy Budget Analysis
